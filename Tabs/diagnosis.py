@@ -12,7 +12,7 @@ import google.generativeai as genai
 load_dotenv()
 
 # Load API Key from Streamlit secrets
-GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+GEMINI_API_KEY = st.secrets["gemini"]["api_key"]
 
 if not GEMINI_API_KEY:
     raise ValueError("Gemini API key is missing! Add it to Streamlit secrets.")

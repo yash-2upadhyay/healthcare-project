@@ -7,3 +7,5 @@ scikit-learn
 fpdf
 google-generativeai
 python-dotenv
+streamlit-authenticator
+

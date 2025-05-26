@@ -45,6 +45,7 @@ def predict(X, y, features):
     features = np.array(features).reshape(1, -1)  # Reshape to (1, n_features)
     
     prediction = model.predict(features)
+    print(prediction)
     
     return prediction, score
 

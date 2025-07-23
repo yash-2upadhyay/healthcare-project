@@ -1,52 +1,39 @@
-import numpy as np
+import joblib
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
-import streamlit as st
+import numpy as np
 
-
-@st.cache_data()
-
+# -------------------------
+# Load Dataset
+# -------------------------
 def load_data():
-    df=pd.read_csv('diabetes.csv')
-    X = df[['HbA1c_level','Pregnancies','Glucose','BloodPressure','SkinThickness','Insulin','BMI','DiabetesPedigreeFunction','Age']]
-    y = df['Outcome']
-
+    df = pd.read_csv("diabetes.csv")  # Make sure this file exists in the same folder
+    X = df.drop(columns=["Outcome"])
+    y = df["Outcome"]
     return df, X, y
 
+# -------------------------
+# Load Trained Pipeline
+# -------------------------
+pipeline = joblib.load("diabetes_pipeline.pkl")  # Corrected path
 
-@st.cache_data()
-
-def train_model(X,y):
-    model = DecisionTreeClassifier(
-        ccp_alpha=0.0, #Increases the amount of pruning, which reduces overfitting. 
-        class_weight=None, #This parameter allows you to assign different weights to classes
-        criterion='entropy', #This parameter determines the function to measure the quality of a split.
-        max_depth=4, #A deeper tree can model more complex patterns but may lead to overfitting
-        max_features=None, #This parameter controls the number of features to consider when looking for the best split
-        max_leaf_nodes=None, #This parameter limits the maximum number of leaf nodes in the tree. Setting this parameter can help control overfitting.
-        min_impurity_decrease=0.0, #If the impurity decrease from a split is less than this value, the split will not be performed.
-        min_samples_leaf=1, #A smaller value allows the tree to create more leaves, which can lead to overfitting.
-        min_samples_split=2, #If a node has fewer samples than this value, it will not be split
-        min_weight_fraction_leaf=0.0, #This parameter controls the minimum weighted fraction of the total sum of weights 
-        random_state=42, #Setting it to an integer ensures that the results are reproducible.
-        splitter='best' #This parameter controls the strategy used to choose the split at each node.
-        )
+# -------------------------
+# Prediction Function
+# -------------------------
+def predict(X, y, input_features):
+    input_array = np.array(input_features).reshape(1, -1)
     
-    model.fit(X,y)
-
-    score = model.score(X,y)
-
-    return model, score
-
-def predict(X, y, features):
-    model, score = train_model(X, y)
+    # Scale input using pipeline's scaler
+    scaled_input = pipeline["scaler"].transform(input_array)
     
-    # Reshape the features correctly
-    features = np.array(features).reshape(1, -1)  # Reshape to (1, n_features)
+    # Predict using model
+   
+    prediction = pipeline["model"].predict(scaled_input)[0]
+    confidence = pipeline["model"].predict_proba(scaled_input)[0][int(prediction)]
+
     
-    prediction = model.predict(features)
-    print(prediction)
-    
-    return prediction, score
+    return prediction, confidence
+
+
+
 
 
